@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Register page{% endblock %}
+
+{% block content %}
+
+<h1>Register page</h1>
+
+<div>
+    <form method="post" action="/register">
+        <label for="username_filed">Логин</label>
+        <input type="text" name="username" id="username_field">
+        
+        <label for="email_field">Почта</label>
+        <input type="text" name='user_email' id="email_field">
+
+        <label for="phone_field">Номер телефона</label>
+        <input type="tel" name='user_phone' id="phone_field">
+
+        <label for="fio_field">ФИО</label>
+        <input type="text" name="user_fio" id="fio_field">
+
+        <label for="password_field">Пароль</label>
+        <input type="password" name='user_password' id="password_field">
+
+        <button>Зарегистрироваться</button>
+    </form>
+</div>
+
+
+
+
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Create order{% endblock %}
+
+{% block content %}
+
+<h1>Create order</h1>
+
+{% if products %}
+<div>
+    <form  method="post" action="/orders/create_order">
+        <select name="select_item" id="select_item">
+            
+            {% for product in products %}
+            <option value="{{ product.id }}">
+                {{ product.name }} - {{ product.price }} рубля
+            </option>
+            {% endfor %}
+        </select>
+        
+        <label for="quantity"></label>
+            <input type="text" name="quantity" id="quantity">
+            
+            <label for="address"></label>
+            <input type="text" name="address" id="address">
+            
+            <button>Прибрести</button>
+        </form>
+    </div>
+    
+{% else %}
+    
+    <h2>Нет товаров для заказа</h2>
+
+{% endif %}
+
+
+{% endblock %}

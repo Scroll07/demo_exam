@@ -1,0 +1,32 @@
+{% extends 'base.hyml' %}
+
+{% block title %}Auth{% endblock %}
+
+{% block content %}
+
+<h1>Auth page</h1>
+
+<div>
+    <form method="post" action="/login">
+        <label for="username_filed"></label>
+        <input type="text" name="username_filed" id="username">
+        
+        <label for="password_field">Пароль</label>
+        <input type="password" name='user_password' id="password_field">
+
+        <button>Войти</button>
+    </form>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+{% endblock %}
