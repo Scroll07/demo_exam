@@ -1,7 +1,10 @@
+from enum import StrEnum
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.types import Enum
 from sqlalchemy import func, ForeignKey, text
 from datetime import datetime
 
+from src.schemas import OrderStatus, UserRoles
 
 
 class Base(DeclarativeBase):
@@ -17,6 +20,7 @@ class Users(Base):
     password_hash: Mapped[str] = mapped_column(nullable=False)
     fio: Mapped[str] = mapped_column(nullable=False)
     phone_number: Mapped[str] = mapped_column(unique=True, nullable=False)
+    role: Mapped[UserRoles] = mapped_column(nullable=False)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     
     orders: Mapped[list["Orders"]] = relationship(back_populates="user")
@@ -38,9 +42,11 @@ class Orders(Base):
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
     quantity: Mapped[int] = mapped_column(default=1)
     delivery_address: Mapped[str] = mapped_column(nullable=False)
-    status: Mapped[str]
+    status: Mapped[OrderStatus] = mapped_column(nullable=False, default=OrderStatus.PENDING)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     user: Mapped["Users"] = relationship(back_populates="orders")
+    product: Mapped["Products"] = relationship()
 
 
 

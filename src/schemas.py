@@ -1,5 +1,7 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
-from enum import Enum
+from enum import Enum, StrEnum
 
 
 
@@ -17,6 +19,15 @@ class Register_DB(BaseModel):
     password_hash: str
     fio: str
     phone_number: str
+
+
+class OrderResponse(BaseModel):
+    product_name: str
+    quantity: int
+    address: str
+    status: "OrderStatus"
+    created_at: datetime
+    
     
 
 class Product(BaseModel):
@@ -24,13 +35,22 @@ class Product(BaseModel):
     name: str
     price: int
 
+    
+class VerifyData(BaseModel):
+    id: int
+    password_hash: str
 
-class OrderStatus(str, Enum):
+
+
+    
+
+class UserRoles(StrEnum):
+    USER = "user"
+    ADMIN = "admin"
+
+
+class OrderStatus(StrEnum):
     PENDING = "pending"
     CONFIRMED = "confirmed"
     DENIED = "denied"
-
-
-
-
 

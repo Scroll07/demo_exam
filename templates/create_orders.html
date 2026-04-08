@@ -8,8 +8,9 @@
 
 {% if products %}
 <div>
-    <form  method="post" action="/orders/create_order">
-        <select name="select_item" id="select_item">
+    <form  method="post" action="/orders/new/create">
+        <label for="select_item">Товар</label>
+        <select name="selected_item" id="select_item">
             
             {% for product in products %}
             <option value="{{ product.id }}">
@@ -18,10 +19,10 @@
             {% endfor %}
         </select>
         
-        <label for="quantity"></label>
+            <label for="quantity">Количество</label>
             <input type="text" name="quantity" id="quantity">
             
-            <label for="address"></label>
+            <label for="address">Адрес доставки</label>
             <input type="text" name="address" id="address">
             
             <button>Прибрести</button>
@@ -33,6 +34,10 @@
     <h2>Нет товаров для заказа</h2>
 
 {% endif %}
+
+<form method="get" action="/orders">
+    <button>Перейти к заказам</button>
+</form>
 
 
 {% endblock %}

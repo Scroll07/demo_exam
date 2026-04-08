@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Your orders{% endblock %}
+
+{% block content %}
+
+{% if orders %}
+<h1>Your orders</h1>
+
+<div>
+    <table> 
+        <thead> 
+            <th>Product name</th>
+            <th>Quantity</th>
+            <th>Address</th>
+            <th>status</th>
+            <th>created at</th>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{order.product_name}}</td>
+                    <td>{{order.quantity}}</td>
+                    <td>{{order.address}}</td>
+                    <td>{{order.status}}</td>
+                    <td>{{order.created_at}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+    
+{% else %}
+    
+    <h2>У вас нет совершенных заказов</h2>
+
+{% endif %}
+
+
+{% endblock %}
