@@ -4,16 +4,24 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 
 from src.dao.orders_dao import OrderDao
 from src.dao.product_dao import ProductDao
-from src.dependencies import get_db
+from src.dependencies import get_db, user_validate
 from src.dao.user_dao import UserDao
 from src.services.secrets import create_hash, verify_hash
-from src.schemas import OrderResponse, Product, RegisterRequest, Register_DB
+from src.schemas import OrderResponse, Product, RegisterRequest, Register_DB, UserRoles, UserValidateData
 from src.services.login_serrvice import authorize
+from src.config import config
 
 base_router = APIRouter()
 
 templates = Jinja2Templates(directory='templates')
 
+
+@base_router.get("/", response_class=HTMLResponse)
+async def home_page_get(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="home.html"
+    )
 
 @base_router.get("/register", response_class=HTMLResponse)
 async def register_get(
@@ -37,22 +45,20 @@ async def register_post(
     
     db = Depends(get_db),
 ):
+    role = UserRoles.USER
+    if username == config.ADMIN_USERNAME and user_password == config.ADMIN_PASSWORD:
+        role = UserRoles.ADMIN
+        
     try:
-        user_data = RegisterRequest(
+        dao = UserDao(session=db)
+        password_hash = create_hash(user_password)
+        create_user_data = Register_DB(
             username=username,
             email=user_email,
-            phone_number=user_phone,
-            fio=user_fio,
-            password=user_password
-        )
-        dao = UserDao(session=db)
-        password_hash = create_hash(user_data.password)
-        create_user_data = Register_DB(
-            username=user_data.username,
-            email=user_data.email,
             password_hash=password_hash,
-            fio=user_data.fio,
-            phone_number=user_data.phone_number
+            fio=user_fio,
+            role=role,
+            phone_number=user_phone,
         )
         
         await dao.register_user(user_data=create_user_data)
@@ -83,6 +89,8 @@ async def login_get(
 
 @base_router.post("/login")
 async def login_post(
+    request: Request,
+    
     username = Form(...),
     password = Form(...),
     
@@ -96,13 +104,9 @@ async def login_post(
             status_code=status.HTTP_303_SEE_OTHER
         )
         
-        response.set_cookie(
-            key="user_id",
-            value=str(user_id),
-            max_age=3600,
-            httponly=True,
-        )
-            
+        request.session["user_id"] = user_id
+        request.session["role"] = UserRoles.USER
+        
         return response
     
     except HTTPException as e:
@@ -119,14 +123,11 @@ async def login_post(
 
 @base_router.get("/orders/new/create", response_class=HTMLResponse)
 async def create_orders_get(
-#   response: Response,
-  request: Request,
+    request: Request,
   
-  db = Depends(get_db)  
-):
-    user_id = request.cookies.get("user_id")
-    if not user_id:
-        raise HTTPException(403, detail="Unauthorized")    
+    user_data: UserValidateData = Depends(user_validate),
+    db = Depends(get_db) , 
+): 
     
     try:
         dao = ProductDao(db)
@@ -156,16 +157,13 @@ async def create_order_post(
     quantity = Form(...),
     address = Form(...),
     
+    user_data: UserValidateData = Depends(user_validate),
     db = Depends(get_db),
 ):
-    user_id = request.cookies.get("user_id")
-    if not user_id:
-        raise HTTPException(403, detail="Unauthorized") 
-    user_id = int(user_id)
     
     try:
         dao = OrderDao(db)
-        new_order = await dao.create_order(user_id=user_id, product_id=selected_item, quantity=quantity, address=address)
+        new_order = await dao.create_order(user_id=user_data.user_id, product_id=selected_item, quantity=quantity, address=address)
         
         return RedirectResponse(
             "/orders/new/create",
@@ -181,14 +179,13 @@ async def create_order_post(
 async def user_orders_get(
     requst: Request,
     
+    user_data: UserValidateData = Depends(user_validate),
     db = Depends(get_db)
 ):
-    user_id = requst.cookies.get("user_id")
-    if not user_id:
-        raise HTTPException(403, detail="Unauthorized")
+
         
     dao = OrderDao(db)
-    orders = await dao.get_user_orders(int(user_id))
+    orders = await dao.get_user_orders(user_data.user_id)
     context = [OrderResponse(
         product_name=order.product.name,
         quantity=order.quantity,
@@ -205,11 +202,14 @@ async def user_orders_get(
     )
 
 
-# @base_router.get("/admin/login", response_class=HTMLResponse)
-# async def admin_login_get(
-#     request: Request
-# ):
-
+@base_router.get("/admin", response_class=HTMLResponse)
+async def admin_login_get(
+    request: Request,
+    
+    db = Depends(get_db),
+    user_data = Depends(user_validate)
+):
+    pass
 
 
 

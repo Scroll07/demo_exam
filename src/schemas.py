@@ -10,6 +10,7 @@ class RegisterRequest(BaseModel):
     email: str 
     password: str = Field(min_length=4)
     fio: str
+    role: "UserRoles"
     phone_number: str
 
 
@@ -18,6 +19,7 @@ class Register_DB(BaseModel):
     email: str 
     password_hash: str
     fio: str
+    role: "UserRoles"
     phone_number: str
 
 
@@ -42,7 +44,9 @@ class VerifyData(BaseModel):
 
 
 
-    
+class UserValidateData(BaseModel):
+    user_id: int
+    role: "UserRoles"
 
 class UserRoles(StrEnum):
     USER = "user"

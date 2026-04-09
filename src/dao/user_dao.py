@@ -17,6 +17,7 @@ class UserDao:
                 email=user_data.email,
                 password_hash=user_data.password_hash,
                 fio=user_data.fio,
+                role=user_data.role,
                 phone_number=user_data.phone_number
             )
             self.session.add(new_user)
